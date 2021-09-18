@@ -6,11 +6,17 @@ import re
 
 
 def network_capture():
-    cmd =['tcpdump', '-w', 'traffic.pcap']#our command
+    print("Please specify what interface you would like to capture on")
+    interface=input()
+    print("Please specify how long you would like to run this scan in seconds")
+    time=input()
+    duration=(f'duration:{time}')
+    cmd =['tshark', '-i',interface,'-a',duration,'-w','traffic.pcapng']#our command
 
-    f = open('traffic.pcap', 'w') #this creates the file
+    d = open('traffic.pcapng', 'w') #this creates the file
 
     subprocess.run(cmd)#this sends it to f
+    print('Saved Captured Network Traffic to file name traffic.pcapng')
 
 host_IP = subprocess.check_output(['hostname', '--all-ip-addresses'])
 host_IP=host_IP.split()
@@ -37,7 +43,6 @@ def dos(pcap):
                 i=i.replace(' →','')
                 src_ip.append(i)
         for i in timestamps:
-            # print(i[6:8])
             if i[6:8] != seconds:
                 event_list.append(event_count)
                 seconds = i[6:8]
@@ -46,10 +51,10 @@ def dos(pcap):
                     event_list.pop(0)
             else:
                 event_count += 1
-    if sum(event_list) >= 50:
+    if sum(event_list) >= 500:
         for i in host_IP2:
             snort = open('SNORT_Rules.txt','a+')
-            n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE DDOS ATTACK")\n')
+            n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE DOS ATTACK")\n')
             ufw = open('UFW_Rules.txt','a+')
             u = ufw.write(f'sudo ufw deny from {ip}\n')
             snort.close()
@@ -71,7 +76,6 @@ def ping(pcap):
     snort = open('SNORT_Rules.txt','a+')#opens new file, saves reccomended snort rule
     if IP_list:
         for i in IP_set:
-            # print(IP_set)
             if i not in host_IP2:
                 for ip in host_IP2:
                     n = snort.write(f'Alert ICMP {i} any -> {ip} (sid:1000002; MSG:"PING SCAN")\n')#makes the snort rule
@@ -82,8 +86,6 @@ def ping(pcap):
                 for ip in host_IP2:
                     u = ufw.write(f'sudo ufw deny from {i}\n')
         ufw.close()
-    else:
-        print("This file contains no ICMP traffic")
 
 
 def SYN_DOS(pcap):
@@ -106,12 +108,6 @@ def SYN_DOS(pcap):
                 src_ip.append(i)
     src_ip=sorted(src_ip)
     compare = {}
-    # for i in src_ip:
-    #     if i not in host_IP2:
-    #         if i in compare.keys():
-    #             compare[i]+=1
-    #         else:
-    #             compare[i]=0
     for i in timestamps:
         if i[6:8] != seconds:
             event_list.append(event_count)
@@ -121,7 +117,7 @@ def SYN_DOS(pcap):
                 event_list.pop(0)
         else:
             event_count += 1
-    if sum(event_list) >= 10:
+    if sum(event_list) >= 500:
         for i in host_IP2:
             snort = open('SNORT_Rules.txt','a+')
             n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE SYN DOS ATTACK")\n')
@@ -148,7 +144,6 @@ def xmas(pcap):
                 i=i.replace(' →','')
                 src_ip.append(i)
         for i in timestamps:
-            # print(i[6:8])
             if i[6:8] != seconds:
                 event_list.append(event_count)
                 seconds = i[6:8]
@@ -166,13 +161,50 @@ def xmas(pcap):
             snort.close()
             ufw.close()
 
+def stealth_scans(pcap):
+    seconds = '00'
+    event_count = 0
+    event_list = []
+    IP_list=[]
+    src_ip=[]
+    timestamps=[]
+    tshark_traffic=subprocess.check_output(['tshark','-r',pcap,'-Y','tcp.flags.reset==1 and tcp.flags.ack==1']).decode("utf-8")
+    tshark_traffic = tshark_traffic.split('\n')
+    for line in tshark_traffic:
+        strings = line.split()
+        if len(strings) != 0:
+            timestamps.append(strings[2])
+            IP_list +=re.findall(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3} →',line)
+            for i in IP_list:
+                i=i.replace(' →','')
+                src_ip.append(i)
+        for i in timestamps:
+            if i[6:8] != seconds:
+                event_list.append(event_count)
+                seconds = i[6:8]
+                event_count = 1
+                if len(event_list) == 10:
+                    event_list.pop(0)
+            else:
+                event_count += 1
+    if sum(event_list) >= 50:
+        for i in host_IP2:
+            snort = open('SNORT_Rules.txt','a+')
+            n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE NMAP Stealth SCAN")\n')
+            ufw = open('UFW_Rules.txt','a+')
+            u = ufw.write(f'sudo ufw deny from {ip}\n')
+            snort.close()
+            ufw.close()
 
 def open_pcap():
     pcap=sys.argv[2]
-    # dos(pcap)
-    # ping(pcap)
-    # SYN_DOS(pcap)
+    dos(pcap)
+    ping(pcap)
+    SYN_DOS(pcap)
     xmas(pcap)
+    stealth_scans(pcap)
+    print("Saved Reccomended Rules for SNORT to file named SNORT_Rules.txt")
+    print("Saved Reccomended Rules for UFW to file name UFW_Rules.txt")
 def Main():
     parser = argparse.ArgumentParser(description="An Automatic Snort/UFW rule suggestor")
     group= parser.add_mutually_exclusive_group()
