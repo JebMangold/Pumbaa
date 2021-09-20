@@ -221,7 +221,6 @@ def open_directory():
     files = sys.argv[2]
     files=glob.glob(f'{files}/*.pcap*')
     files = sorted(files)
-
     for x in files:
         # print(x)
         dos(x)
@@ -229,6 +228,7 @@ def open_directory():
         SYN_DOS(x)
         xmas(x)
         stealth_scans(x)
+        print("Saved Rule Suggestions to SNORT_Rules.txt, and UFW_Rules.txt")
 
 
 
