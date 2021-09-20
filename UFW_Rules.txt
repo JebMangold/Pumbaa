@@ -1,8 +1,2 @@
-sudo ufw deny from 172.217.13.238
-sudo ufw deny from 172.217.13.238
-sudo ufw deny from 10.0.2.2
-sudo ufw deny from 10.0.2.2
-sudo ufw deny from 192.168.56.106
-sudo ufw deny from 192.168.56.106
-sudo ufw deny from 192.168.56.106
-sudo ufw deny from 192.168.56.106
+sudo ufw deny from 192.168.56.111
+sudo ufw deny from 192.168.56.111
