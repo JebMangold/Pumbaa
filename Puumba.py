@@ -35,7 +35,7 @@ def dos(pcap):
     IP_list=[]
     src_ip=[]
     timestamps=[]
-    tshark_traffic=subprocess.check_output(['tshark','-r',pcap,'-Y','tcp.flags.syn==1 and tcp.flags.ack==0']).decode("utf-8")
+    tshark_traffic=subprocess.check_output(['tshark','-r',pcap,'-Y http.request.method == "GET"']).decode("utf-8")
     tshark_traffic = tshark_traffic.split('\n')
     for line in tshark_traffic:
         strings = line.split()
@@ -57,11 +57,11 @@ def dos(pcap):
         if i == len(timestamps)-1:
             event_list.append(event_count)
     src_ip=set(src_ip)
-    if sum(event_list) >= 1100:
+    if sum(event_list) >= 35:
         for i in host_IP2:
             for ip in src_ip:
                 snort = open('SNORT_Rules.txt','a+')
-                n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE DOS ATTACK")\n')
+                n = snort.write(f'Alert any {ip} any -> {i} (sid:1000003; MSG:"POSSIBLE HTTP FLOOD DoS")\n')
                 ufw = open('UFW_Rules.txt','a+')
                 u = ufw.write(f'sudo ufw deny from {ip}\n')
                 snort.close()
@@ -230,7 +230,6 @@ def open_directory():
     files=glob.glob(f'{files}/*.pcap*')
     files = sorted(files)
     for x in files:
-        # print(x)
         dos(x)
         ping(x)
         SYN_DOS(x)
