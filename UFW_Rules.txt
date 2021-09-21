@@ -1,2 +1,10 @@
+sudo ufw deny from 10.0.0.2
+sudo ufw deny from 10.0.0.2
+sudo ufw deny from 10.0.0.2
+sudo ufw deny from 10.0.0.2
+sudo ufw deny from 10.0.0.2
+sudo ufw deny from 10.0.0.2
 sudo ufw deny from 192.168.56.111
 sudo ufw deny from 192.168.56.111
+sudo ufw deny from 192.168.56.106
+sudo ufw deny from 192.168.56.106

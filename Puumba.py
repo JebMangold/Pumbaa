@@ -29,7 +29,7 @@ for ip in host_IP:
 
 
 def dos(pcap):
-    seconds = '00'
+    seconds = 'xx'
     event_count = 0
     event_list = []
     IP_list=[]
@@ -45,17 +45,19 @@ def dos(pcap):
             for i in IP_list:
                 i=i.replace(' →','')
                 src_ip.append(i)
-        for i in timestamps:
-            if i[6:8] != seconds:
-                event_list.append(event_count)
-                seconds = i[6:8]
-                event_count = 1
-                if len(event_list) == 10:
-                    event_list.pop(0)
-            else:
-                event_count += 1
+    for i in range(len(timestamps)):
+        if timestamps[i][6:8] != seconds:
+            event_list.append(event_count)
+            seconds = timestamps[i][6:8]
+            event_count = 1
+            if len(event_list) == 10:
+                event_list.pop(0)
+        else:
+            event_count += 1
+        if i == len(timestamps)-1:
+            event_list.append(event_count)
     src_ip=set(src_ip)
-    if sum(event_list) >= 500:
+    if sum(event_list) >= 1100:
         for i in host_IP2:
             for ip in src_ip:
                 snort = open('SNORT_Rules.txt','a+')
@@ -94,7 +96,7 @@ def ping(pcap):
 
 
 def SYN_DOS(pcap):
-    seconds = '00'
+    seconds = 'xx'
     event_count = 0
     event_list = []
     IP_list=[]
@@ -113,17 +115,19 @@ def SYN_DOS(pcap):
                 src_ip.append(i)
     src_ip=sorted(src_ip)
     compare = {}
-    for i in timestamps:
-        if i[6:8] != seconds:
+    for i in range(len(timestamps)):
+        if timestamps[i][6:8] != seconds:
             event_list.append(event_count)
-            seconds = i[6:8]
+            seconds = timestamps[i][6:8]
             event_count = 1
             if len(event_list) == 10:
                 event_list.pop(0)
         else:
             event_count += 1
+        if i == len(timestamps)-1:
+            event_list.append(event_count)
     src_ip= set(src_ip)
-    if sum(event_list) >= 500:
+    if sum(event_list) >= 1100:
         for i in host_IP2:
             for ip in src_ip:
                 snort = open('SNORT_Rules.txt','a+')
@@ -134,7 +138,7 @@ def SYN_DOS(pcap):
                 ufw.close()
 
 def xmas(pcap):
-    seconds = '00'
+    seconds = 'xx'
     event_count = 0
     event_list = []
     IP_list=[]
@@ -150,17 +154,19 @@ def xmas(pcap):
             for i in IP_list:
                 i=i.replace(' →','')
                 src_ip.append(i)
-        for i in timestamps:
-            if i[6:8] != seconds:
-                event_list.append(event_count)
-                seconds = i[6:8]
-                event_count = 1
-                if len(event_list) == 10:
-                    event_list.pop(0)
-            else:
-                event_count += 1
+    for i in range(len(timestamps)):
+        if timestamps[i][6:8] != seconds:
+            event_list.append(event_count)
+            seconds = timestamps[i][6:8]
+            event_count = 1
+            if len(event_list) == 10:
+                event_list.pop(0)
+        else:
+            event_count += 1
+        if i == len(timestamps)-1:
+            event_list.append(event_count)
     src_ip = set(src_ip)
-    if sum(event_list) >= 50:
+    if sum(event_list) >= 500:
         for i in host_IP2:
             for ip in src_ip:
                 snort = open('SNORT_Rules.txt','a+')
@@ -171,7 +177,7 @@ def xmas(pcap):
                 ufw.close()
 
 def stealth_scans(pcap):
-    seconds = '00'
+    seconds = 'xx'
     event_count = 0
     event_list = []
     IP_list=[]
@@ -187,17 +193,19 @@ def stealth_scans(pcap):
             for i in IP_list:
                 i=i.replace(' →','')
                 src_ip.append(i)
-        for i in timestamps:
-            if i[6:8] != seconds:
-                event_list.append(event_count)
-                seconds = i[6:8]
-                event_count = 1
-                if len(event_list) == 10:
-                    event_list.pop(0)
-            else:
-                event_count += 1
+    for i in range(len(timestamps)):
+        if timestamps[i][6:8] != seconds:
+            event_list.append(event_count)
+            seconds = timestamps[i][6:8]
+            event_count = 1
+            if len(event_list) == 10:
+                event_list.pop(0)
+        else:
+            event_count += 1
+        if i == len(timestamps)-1:
+            event_list.append(event_count)
     src_ip=set(src_ip)
-    if sum(event_list) >= 50:
+    if sum(event_list) >= 1000:
         for i in host_IP2:
             for ip in src_ip:
                 snort = open('SNORT_Rules.txt','a+')
